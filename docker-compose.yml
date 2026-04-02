@@ -18,9 +18,9 @@ services:
       POSTGRES_USER: app
       POSTGRES_DB: app
       # TODO 2: replace plain password with secret usage where possible (don't forget to add secrets)
-      POSTGRES_PASSWORD:./secrets/db_password.txt
-      secrets:
-        db_password
+      POSTGRES_PASSWORD_FILE: /run/secrets/db_password
+    secrets:
+      - db_password
     # TODO 3: add a healthcheck with test command ["CMD-SHELL", "pg_isready -U app"]
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U app"]
@@ -61,4 +61,4 @@ secrets:
 
 # TODO 9: define named volume postgres_data
 volumes:
-  postgress_data
+  postgres_data:
