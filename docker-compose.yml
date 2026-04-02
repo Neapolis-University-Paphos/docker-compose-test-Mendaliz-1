@@ -8,7 +8,7 @@ services:
     depends_on:
       db:
         # TODO 1: backend must wait until db is healthy
-        condition: service_started
+        condition: service_healthy
     networks:
       - private
 
@@ -18,17 +18,24 @@ services:
       POSTGRES_USER: app
       POSTGRES_DB: app
       # TODO 2: replace plain password with secret usage where possible (don't forget to add secrets)
-      POSTGRES_PASSWORD: insecure_password
+      POSTGRES_PASSWORD:./secrets/db_password.txt
+      secrets:
+        db_password
     # TODO 3: add a healthcheck with test command ["CMD-SHELL", "pg_isready -U app"]
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U app"]
+      interval: 5s
+      retries: 5
     volumes:
       # TODO 4: replace with named volume postgres_data mounted to /var/lib/postgresql/data
-      - ./tmp-db:/var/lib/postgresql/data
+      - postgres_data:/var/lib/postgresql/data
     networks:
       - private
 
   frontend:
     image: nginx:alpine
     # TODO 5: move frontend under profile "frontend"
+    profiles: [frontend]
     networks:
       - public
 
@@ -37,6 +44,7 @@ services:
     depends_on:
       - db
     # TODO 6: move debug service under profile "debug"
+    profiles: [debug]
     networks:
       - public
 
@@ -44,6 +52,13 @@ networks:
   public:
   # TODO 7: make private network internal
   private:
+    internal: true
 
 # TODO 8: define secret db_password from file ./secrets/db_password.txt
+secrets:
+  db_password:
+    file: ./secrets/db_password.txt
+
 # TODO 9: define named volume postgres_data
+volumes:
+  postgress_data
